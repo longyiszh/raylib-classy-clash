@@ -1,82 +1,231 @@
 #include "raylib.h"
 #include "raymath.h"
 
-struct AnimationData
+class AnimationData
 {
-    Rectangle textureBoundary;
-    Vector2 position;
-    int animationframe;
-    float updateTime;
-    float runningTime;
+private:
+    int m_textureFrameColumnsCount;
+    int m_textureFrameRowsCount;
+    float m_textureFrameWidth{};
+    float m_textureFrameHeight{};
+    Vector2 m_position{};
+    int m_currentFrame{0};
+    float m_updateTime;
+    float m_runningTime{0};
+    Rectangle *m_currentTextureBoundary;
+    // of type Rectangle[]
+    Rectangle *m_textureFrameBoundaries;
+    int m_textureFrameTotalCount;
+
+    void initializeFrameBoundaries()
+    {
+        m_textureFrameBoundaries = new Rectangle[getTextureFramesCount()];
+        for (int xIndex = 0; xIndex < m_textureFrameColumnsCount; xIndex++)
+        {
+            for (int yIndex = 0; yIndex < m_textureFrameRowsCount; yIndex++)
+            {
+                m_textureFrameBoundaries[yIndex * m_textureFrameColumnsCount + xIndex] = Rectangle{
+                    .x{m_textureFrameWidth * xIndex},
+                    .y{m_textureFrameHeight * yIndex},
+                    .width{m_textureFrameWidth},
+                    .height{m_textureFrameHeight}};
+            }
+        }
+        m_currentTextureBoundary = &m_textureFrameBoundaries[0];
+    }
+
+public:
+    explicit AnimationData(
+        int textureFrameColumnsCount,
+        int textureFrameRowsCount,
+        float textureFrameWidth,
+        float textureFrameHeight,
+        float updateTime) : m_textureFrameColumnsCount(textureFrameColumnsCount),
+                            m_textureFrameRowsCount(textureFrameRowsCount),
+                            m_textureFrameWidth(textureFrameWidth),
+                            m_textureFrameHeight(textureFrameHeight),
+                            m_updateTime(updateTime)
+    {
+        initializeFrameBoundaries();
+        m_textureFrameTotalCount = textureFrameColumnsCount * textureFrameRowsCount;
+    }
+
+    ~AnimationData()
+    {
+        delete[] m_textureFrameBoundaries;
+    }
+
+    // => methods
+
+    void update(float currentDeltaTime)
+    {
+        m_runningTime += currentDeltaTime;
+        if (m_runningTime >= m_updateTime)
+        {
+            m_currentTextureBoundary = &(m_textureFrameBoundaries[m_currentFrame]);
+
+            // reset animation stopwatch
+            m_runningTime = 0.0;
+            // control frame
+            m_currentFrame++;
+            if (m_currentFrame > m_textureFrameTotalCount - 1)
+            {
+                m_currentFrame = 0;
+            }
+        }
+    }
+
+    // => getter setters
+    const int getTextureFramesCount() const
+    {
+        return m_textureFrameColumnsCount * m_textureFrameRowsCount;
+    }
+
+    // m_textureFrameWidth
+    const float getTextureFrameWidth() const
+    {
+        return m_textureFrameWidth;
+    }
+
+    // m_textureFrameHeight
+    const float getTextureFrameHeight() const
+    {
+        return m_textureFrameHeight;
+    }
+
+    // m_currentTextureBoundary
+    const Rectangle *getCurrentTextureBoundary() const
+    {
+        return m_currentTextureBoundary;
+    }
 };
 
-/**
- * Instead of moving character on the map,
- * We fix charcter in the middle of the window
- * And move map
- */
-Vector2 moveMap(Vector2 &mapPosition)
+class Character
 {
-    float moveSpeed{8.0f};
-    Vector2 direction{};
-    if (IsKeyDown(KEY_A))
-        direction.x -= 1.0f;
-    if (IsKeyDown(KEY_D))
-        direction.x += 1.0f;
-    if (IsKeyDown(KEY_W))
-        direction.y -= 1.0f;
-    if (IsKeyDown(KEY_S))
-        direction.y += 1.0f;
+private:
+    Texture2D *m_currentTexture;
+    Texture2D m_idleTexture;
+    Texture2D m_runningTexture;
+    Vector2 m_screenPosition{};
+    Vector2 m_worldPosition{};
+    float m_xDirection;
+    float m_speed;
+    AnimationData *m_animData{};
 
-    if (Vector2Length(direction) != 0.0)
+public:
+    explicit Character(
+        Texture2D idleTexture,
+        Texture2D runningTexture,
+        float speed) : m_currentTexture(&m_idleTexture),
+                       m_idleTexture(idleTexture),
+                       m_runningTexture(runningTexture),
+                       m_xDirection(1.0f),
+                       m_speed(speed) {}
+
+    ~Character()
     {
-        // Substract by normalized direction because
-        // 1. moving map in the negative direction
-        // 2. make the length to be 1
-        //    otherwise we would move faster in diagonal directions (sqrt(2))
-        mapPosition = Vector2Subtract(mapPosition,
-                                      Vector2Scale(
-                                          Vector2Normalize(direction),
-                                          moveSpeed));
+        UnloadTexture(m_idleTexture);
+        UnloadTexture(m_runningTexture);
     }
-    return direction;
-}
 
-Rectangle *getFrameBoundaries(float frameWidth, float frameHeight, int columnsCount, int rowsCount)
-{
-    Rectangle *frameBoundaries = new Rectangle[columnsCount * rowsCount];
-    for (int xIndex = 0; xIndex < columnsCount; xIndex++)
+    // => methods
+    void updateScreenPosition(int windowWidth, int windowHeight)
     {
-        for (int yIndex = 0; yIndex < rowsCount; yIndex++)
+        m_screenPosition = {
+            // *4: texture is too tiny, so scaling it up
+            .x{windowWidth / 2.0f - 4 * (0.5f * (m_animData->getTextureFrameWidth()))},
+            .y{windowHeight / 2.0f - 4 * (0.5f * (m_animData->getTextureFrameHeight()))}};
+    }
+
+    void tick(float currentDeltaTime)
+    {
+        Vector2 direction{};
+        if (IsKeyDown(KEY_A))
+            direction.x -= 1.0f;
+        if (IsKeyDown(KEY_D))
+            direction.x += 1.0f;
+        if (IsKeyDown(KEY_W))
+            direction.y -= 1.0f;
+        if (IsKeyDown(KEY_S))
+            direction.y += 1.0f;
+
+        if (Vector2Length(direction) != 0.0)
         {
-            frameBoundaries[yIndex * columnsCount + xIndex] = Rectangle{
-                .x{frameWidth * xIndex},
-                .y{frameHeight * yIndex},
-                .width{frameWidth},
-                .height{frameHeight}};
+            // Add by normalized direction to make the length to be 1
+            //    otherwise we would move faster in diagonal directions (sqrt(2))
+            m_worldPosition = Vector2Add(m_worldPosition,
+                                         Vector2Scale(
+                                             Vector2Normalize(direction),
+                                             m_speed));
+            // flip xDirection
+            if (direction.x <= -1.0f)
+            {
+                m_xDirection = -1.0f;
+            }
+            else if (direction.x >= 1.0f)
+            {
+                m_xDirection = 1.0f;
+            }
+
+            // apply running texture
+            m_currentTexture = &m_runningTexture;
         }
-    }
-    return frameBoundaries;
-}
-
-AnimationData updateAnimationData(AnimationData nextAnimData, Rectangle frames[], int animFrameCount, float currentDeltaTime)
-{
-    nextAnimData.runningTime += currentDeltaTime;
-    if (nextAnimData.runningTime >= nextAnimData.updateTime)
-    {
-        nextAnimData.textureBoundary = frames[nextAnimData.animationframe];
-
-        // reset animation stopwatch
-        nextAnimData.runningTime = 0.0;
-        // control frame
-        nextAnimData.animationframe++;
-        if (nextAnimData.animationframe > animFrameCount - 1)
+        else
         {
-            nextAnimData.animationframe = 0;
+            // apply idle texture
+            m_currentTexture = &m_idleTexture;
         }
+
+        m_animData->update(currentDeltaTime);
     }
-    return nextAnimData;
-}
+
+    // => getter setters
+
+    // currentTexture
+    const Texture2D &getCurrentTexture() const
+    {
+        return *m_currentTexture;
+    }
+
+    // screenPosition
+    const Vector2 &getScreenPosition() const
+    {
+        return m_screenPosition;
+    }
+
+    void setScreenPosition(Vector2 &screenPosition)
+    {
+        m_screenPosition = screenPosition;
+    }
+
+    // worldPosition
+    const Vector2 &getWorldPosition() const
+    {
+        return m_worldPosition;
+    }
+
+    // xDirection
+    const float getXDirection() const
+    {
+        return m_xDirection;
+    }
+
+    void setXDirection(float xDirection)
+    {
+        m_xDirection = xDirection;
+    }
+
+    // animData
+    const AnimationData *getAnimData() const
+    {
+        return m_animData;
+    }
+
+    void setAnimData(AnimationData *animData)
+    {
+        m_animData = animData;
+    }
+};
 
 int main()
 {
@@ -88,47 +237,35 @@ int main()
     Texture2D mapTexture{LoadTexture("map/map0.png")};
     Vector2 mapPosition{}; // Will be initialzed to {0.0f, 0.0f}
 
-    // Textures here must have same width and height
-    Texture2D knightIdleTexture{LoadTexture("assets/characters/knight_idle_spritesheet.png")};
-    Texture2D knightRunningTexture{LoadTexture("assets/characters/knight_run_spritesheet.png")};
+    Character knight(
+        // Textures here must have same width and height
+        LoadTexture("assets/characters/knight_idle_spritesheet.png"),
+        LoadTexture("assets/characters/knight_run_spritesheet.png"),
+        8.0f);
 
-    Rectangle knightSource{
-        .x{0},
-        .y{0},
-        .width{knightIdleTexture.width / 6.0f},
-        .height{(float)knightIdleTexture.height}};
+    Texture2D knightCurrentTexture = knight.getCurrentTexture();
+    float knightTextureRangeWidth = knightCurrentTexture.width / 6.0f;
+    float knightTextureRangeHeight = knightCurrentTexture.height;
 
-    Vector2 knightPosition{
-        // *4: texture is too tiny, so scaling it up
-        .x{windowWidth / 2.0f - 4 * (0.5f * knightSource.width)},
-        .y{windowHeight / 2.0f - 4 * (0.5f * knightSource.height)}};
+    AnimationData knightAnimData(
+        6,
+        1,
+        knightTextureRangeWidth,
+        knightTextureRangeHeight,
+        1.0 / 12.0);
+
+    knight.setAnimData(
+        &knightAnimData);
+
+    knight.updateScreenPosition(windowWidth, windowHeight);
+
+    Vector2 knightPosition = knight.getScreenPosition();
 
     Rectangle knightDestination{
         .x{knightPosition.x},
         .y{knightPosition.y},
-        .width{knightSource.width * 4},
-        .height{knightSource.height * 4}};
-
-    // -1.0f: facing left; 1.0f: facing right
-    float knightXDirection{1.0f};
-
-    const int knightFrameColumnsCount{6};
-    const int knightFrameRowsCount{1};
-    const int knightFrameBoundariesCount{knightFrameColumnsCount * knightFrameRowsCount};
-
-    // Rectangle[]
-    Rectangle *knightFrameBoundaries = getFrameBoundaries(
-        knightSource.width,
-        knightSource.height,
-        knightFrameColumnsCount,
-        knightFrameRowsCount);
-
-    AnimationData knightAnimData{
-        .textureBoundary{knightFrameBoundaries[0]},
-        .position{},
-        .animationframe{0},
-        .updateTime{1.0 / 12.0},
-        .runningTime{0}};
+        .width{knightTextureRangeWidth * 4},
+        .height{knightTextureRangeHeight * 4}};
 
     SetTargetFPS(60);
 
@@ -140,35 +277,22 @@ int main()
         BeginDrawing();
         ClearBackground(WHITE);
 
-        bool knightIdle{false};
-        Texture2D *knightToDrawTexture{};
+        // update knight postion and anims
+        knight.tick(deltaTime);
 
-        Vector2 moveDirection{moveMap(mapPosition)};
-        if (moveDirection.x <= -1.0f)
-        {
-            knightXDirection = -1.0f;
-        }
-        else if (moveDirection.x >= 1.0f)
-        {
-            knightXDirection = 1.0f;
-        }
+        /**
+         * Instead of moving character on the map,
+         * We fix charcter in the middle of the window
+         * And move map
+         */
+        mapPosition = Vector2Negate(knight.getWorldPosition());
 
-        if (moveDirection.x == 0.0f && moveDirection.y == 0.0f)
-        {
-            knightIdle = true;
-        }
-
-        // update knight anim
-        knightAnimData = updateAnimationData(
-            knightAnimData,
-            knightFrameBoundaries,
-            knightFrameBoundariesCount,
-            deltaTime);
-
-        Rectangle currentKnightSource = knightSource;
-        currentKnightSource.x = knightAnimData.textureBoundary.x;
-        currentKnightSource.y = knightAnimData.textureBoundary.y;
-        currentKnightSource.width *= knightXDirection;
+        Rectangle currentKnightSource{};
+        const Rectangle *currentKnightTextureBoundary = knightAnimData.getCurrentTextureBoundary();
+        currentKnightSource.x = currentKnightTextureBoundary->x;
+        currentKnightSource.y = currentKnightTextureBoundary->y;
+        currentKnightSource.height = knightTextureRangeHeight;
+        currentKnightSource.width = knightTextureRangeWidth * knight.getXDirection();
 
         // draw map
         DrawTextureEx(
@@ -178,18 +302,9 @@ int main()
             4.0f,
             WHITE);
 
-        if (knightIdle)
-        {
-            knightToDrawTexture = &knightIdleTexture;
-        }
-        else
-        {
-            knightToDrawTexture = &knightRunningTexture;
-        }
-
         // draw the knight
         DrawTexturePro(
-            *knightToDrawTexture,
+            knight.getCurrentTexture(),
             currentKnightSource,
             knightDestination,
             Vector2{0, 0},
@@ -201,9 +316,6 @@ int main()
 
     /// Clean ups
     UnloadTexture(mapTexture);
-    UnloadTexture(knightIdleTexture);
-
-    delete[] knightFrameBoundaries;
 
     CloseWindow();
 }
