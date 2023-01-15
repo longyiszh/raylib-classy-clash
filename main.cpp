@@ -177,6 +177,29 @@ public:
         }
 
         m_animData->update(currentDeltaTime);
+
+        const Rectangle *currentTextureBoundary = m_animData->getCurrentTextureBoundary();
+
+        Rectangle currentSource{
+            .x{currentTextureBoundary->x},
+            .y{currentTextureBoundary->y},
+            .width{m_animData->getTextureFrameWidth() * m_xDirection},
+            .height{m_animData->getTextureFrameHeight()}};
+
+        const Rectangle currentDestination{
+            .x{m_screenPosition.x},
+            .y{m_screenPosition.y},
+            .width{m_animData->getTextureFrameWidth() * 4},
+            .height{m_animData->getTextureFrameHeight() * 4}};
+
+        // draw the chracter
+        DrawTexturePro(
+            *m_currentTexture,
+            currentSource,
+            currentDestination,
+            Vector2{0, 0},
+            0.f,
+            WHITE);
     }
 
     // => getter setters
@@ -259,14 +282,6 @@ int main()
 
     knight.updateScreenPosition(windowWidth, windowHeight);
 
-    Vector2 knightPosition = knight.getScreenPosition();
-
-    Rectangle knightDestination{
-        .x{knightPosition.x},
-        .y{knightPosition.y},
-        .width{knightTextureRangeWidth * 4},
-        .height{knightTextureRangeHeight * 4}};
-
     SetTargetFPS(60);
 
     while (!WindowShouldClose())
@@ -277,22 +292,12 @@ int main()
         BeginDrawing();
         ClearBackground(WHITE);
 
-        // update knight postion and anims
-        knight.tick(deltaTime);
-
         /**
          * Instead of moving character on the map,
          * We fix charcter in the middle of the window
          * And move map
          */
         mapPosition = Vector2Negate(knight.getWorldPosition());
-
-        Rectangle currentKnightSource{};
-        const Rectangle *currentKnightTextureBoundary = knightAnimData.getCurrentTextureBoundary();
-        currentKnightSource.x = currentKnightTextureBoundary->x;
-        currentKnightSource.y = currentKnightTextureBoundary->y;
-        currentKnightSource.height = knightTextureRangeHeight;
-        currentKnightSource.width = knightTextureRangeWidth * knight.getXDirection();
 
         // draw map
         DrawTextureEx(
@@ -302,14 +307,8 @@ int main()
             4.0f,
             WHITE);
 
-        // draw the knight
-        DrawTexturePro(
-            knight.getCurrentTexture(),
-            currentKnightSource,
-            knightDestination,
-            Vector2{0, 0},
-            0.f,
-            WHITE);
+        // update knight postion, anims and draw it
+        knight.tick(deltaTime);
 
         EndDrawing();
     }
