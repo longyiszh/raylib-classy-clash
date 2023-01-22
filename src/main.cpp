@@ -6,13 +6,14 @@
 
 int main()
 {
+    // [width, height]
+    int windowDimensions[]{800, 600};
     // Window dimension
-    const int windowWidth{800};
-    const int windowHeight{600};
-    InitWindow(windowWidth, windowHeight, "Raylib Classy Clash");
+    InitWindow(windowDimensions[0], windowDimensions[1], "Raylib Classy Clash");
 
     Texture2D mapTexture{LoadTexture("map/map0.png")};
     Vector2 mapPosition{}; // Will be initialzed to {0.0f, 0.0f}
+    const float mapScale{4.0f};
 
     Character knight(
         // Textures here must have same width and height
@@ -34,7 +35,7 @@ int main()
     knight.setAnimData(
         &knightAnimData);
 
-    knight.updateScreenPosition(windowWidth, windowHeight);
+    knight.updateScreenPosition(windowDimensions[0], windowDimensions[1]);
 
     SetTargetFPS(60);
 
@@ -63,6 +64,16 @@ int main()
 
         // update knight postion, anims and draw it
         knight.tick(deltaTime);
+
+        // undo the knight movement when out of bound
+        const Vector2 currentKnightWorldPosition = knight.getWorldPosition();
+        if (currentKnightWorldPosition.x < 0.0f ||
+            currentKnightWorldPosition.x > mapTexture.width * mapScale - windowDimensions[0] ||
+            currentKnightWorldPosition.y < 0.0f ||
+            currentKnightWorldPosition.y > mapTexture.height * mapScale - windowDimensions[1])
+        {
+            knight.undoMovement();
+        }
 
         EndDrawing();
     }

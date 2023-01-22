@@ -8,35 +8,31 @@
 class Character
 {
 private:
-  Texture2D *m_currentTexture;
+  Texture2D *m_currentTexture{};
   Texture2D m_idleTexture;
   Texture2D m_runningTexture;
   Vector2 m_screenPosition{};
   Vector2 m_worldPosition{};
-  float m_xDirection;
+  Vector2 m_lastWorldPosition{};
+  float m_xDirection{1.0f};
   float m_speed;
+  float m_scale{4.0f};
   AnimationData *m_animData{};
 
 public:
   explicit Character(
       Texture2D idleTexture,
       Texture2D runningTexture,
-      float speed) : m_currentTexture(&m_idleTexture),
-                     m_idleTexture(idleTexture),
-                     m_runningTexture(runningTexture),
-                     m_xDirection(1.0f),
-                     m_speed(speed) {}
+      float speed);
 
-  ~Character()
-  {
-    UnloadTexture(m_idleTexture);
-    UnloadTexture(m_runningTexture);
-  }
+  ~Character();
 
   // => methods
   void updateScreenPosition(int windowWidth, int windowHeight);
 
   void tick(float currentDeltaTime);
+
+  void undoMovement();
 
   // => getter setters
   // currentTexture
