@@ -27,20 +27,9 @@ public:
       int textureFrameRowsCount,
       float textureFrameWidth,
       float textureFrameHeight,
-      float updateTime) : m_textureFrameColumnsCount(textureFrameColumnsCount),
-                          m_textureFrameRowsCount(textureFrameRowsCount),
-                          m_textureFrameWidth(textureFrameWidth),
-                          m_textureFrameHeight(textureFrameHeight),
-                          m_updateTime(updateTime)
-  {
-    initializeFrameBoundaries();
-    m_textureFrameTotalCount = textureFrameColumnsCount * textureFrameRowsCount;
-  }
+      float updateTime);
 
-  ~AnimationData()
-  {
-    delete[] m_textureFrameBoundaries;
-  }
+  ~AnimationData();
 
   // => methods
 

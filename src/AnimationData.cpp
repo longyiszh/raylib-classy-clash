@@ -1,5 +1,26 @@
 #include "AnimationData.h"
 
+// ctor - dtor
+AnimationData::AnimationData(
+    int textureFrameColumnsCount,
+    int textureFrameRowsCount,
+    float textureFrameWidth,
+    float textureFrameHeight,
+    float updateTime) : m_textureFrameColumnsCount(textureFrameColumnsCount),
+                        m_textureFrameRowsCount(textureFrameRowsCount),
+                        m_textureFrameWidth(textureFrameWidth),
+                        m_textureFrameHeight(textureFrameHeight),
+                        m_updateTime(updateTime)
+{
+  initializeFrameBoundaries();
+  m_textureFrameTotalCount = textureFrameColumnsCount * textureFrameRowsCount;
+}
+
+AnimationData::~AnimationData()
+{
+  delete[] m_textureFrameBoundaries;
+}
+
 void AnimationData::initializeFrameBoundaries()
 {
   m_textureFrameBoundaries = new Rectangle[getTextureFramesCount()];

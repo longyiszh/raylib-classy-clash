@@ -1,17 +1,35 @@
 #include "AnimationData.h"
 #include "Character.h"
 
+// ctor - dtor
+Character::Character(
+    Texture2D idleTexture,
+    Texture2D runningTexture,
+    float speed) : m_currentTexture(&m_idleTexture),
+                   m_idleTexture(idleTexture),
+                   m_runningTexture(runningTexture),
+                   m_speed(speed) {}
+
+Character::~Character()
+{
+  UnloadTexture(m_idleTexture);
+  UnloadTexture(m_runningTexture);
+}
+
 // => methods
 void Character::updateScreenPosition(int windowWidth, int windowHeight)
 {
   m_screenPosition = {
       // *4: texture is too tiny, so scaling it up
-      .x{windowWidth / 2.0f - 4 * (0.5f * (m_animData->getTextureFrameWidth()))},
-      .y{windowHeight / 2.0f - 4 * (0.5f * (m_animData->getTextureFrameHeight()))}};
+      .x{windowWidth / 2.0f - m_scale * (0.5f * (m_animData->getTextureFrameWidth()))},
+      .y{windowHeight / 2.0f - m_scale * (0.5f * (m_animData->getTextureFrameHeight()))}};
 }
 
 void Character::tick(float currentDeltaTime)
 {
+  // snapshot current world position
+  m_lastWorldPosition = m_worldPosition;
+
   Vector2 direction{};
   if (IsKeyDown(KEY_A))
     direction.x -= 1.0f;
@@ -62,8 +80,8 @@ void Character::tick(float currentDeltaTime)
   const Rectangle currentDestination{
       .x{m_screenPosition.x},
       .y{m_screenPosition.y},
-      .width{m_animData->getTextureFrameWidth() * 4},
-      .height{m_animData->getTextureFrameHeight() * 4}};
+      .width{m_animData->getTextureFrameWidth() * m_scale},
+      .height{m_animData->getTextureFrameHeight() * m_scale}};
 
   // draw the chracter
   DrawTexturePro(
@@ -73,6 +91,11 @@ void Character::tick(float currentDeltaTime)
       Vector2{0, 0},
       0.f,
       WHITE);
+}
+
+void Character::undoMovement()
+{
+  m_worldPosition = m_lastWorldPosition;
 }
 
 // => getter setters
