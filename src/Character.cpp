@@ -14,6 +14,8 @@ Character::~Character()
 {
   UnloadTexture(m_idleTexture);
   UnloadTexture(m_runningTexture);
+
+  delete[] m_currentRenderPositions;
 }
 
 // => methods
@@ -71,23 +73,27 @@ void Character::tick(float currentDeltaTime)
 
   const Rectangle *currentTextureBoundary = m_animData->getCurrentTextureBoundary();
 
-  Rectangle currentSource{
-      .x{currentTextureBoundary->x},
-      .y{currentTextureBoundary->y},
-      .width{m_animData->getTextureFrameWidth() * m_xDirection},
-      .height{m_animData->getTextureFrameHeight()}};
+  m_currentRenderPositions = new Rectangle[2]{
+      // source
+      {
+          .x{currentTextureBoundary->x},
+          .y{currentTextureBoundary->y},
+          .width{m_animData->getTextureFrameWidth() * m_xDirection},
+          .height{m_animData->getTextureFrameHeight()}},
+      // destination
+      {
+          .x{m_screenPosition.x},
+          .y{m_screenPosition.y},
+          .width{m_animData->getTextureFrameWidth() * m_scale},
+          .height{m_animData->getTextureFrameHeight() * m_scale}}};
+}
 
-  const Rectangle currentDestination{
-      .x{m_screenPosition.x},
-      .y{m_screenPosition.y},
-      .width{m_animData->getTextureFrameWidth() * m_scale},
-      .height{m_animData->getTextureFrameHeight() * m_scale}};
-
-  // draw the chracter
+void Character::render()
+{
   DrawTexturePro(
       *m_currentTexture,
-      currentSource,
-      currentDestination,
+      m_currentRenderPositions[0],
+      m_currentRenderPositions[1],
       Vector2{0, 0},
       0.f,
       WHITE);
@@ -96,6 +102,15 @@ void Character::tick(float currentDeltaTime)
 void Character::undoMovement()
 {
   m_worldPosition = m_lastWorldPosition;
+}
+
+Rectangle Character::getCollisionBox()
+{
+  return Rectangle{
+      .x{m_screenPosition.x},
+      .y{m_screenPosition.y},
+      .width{m_animData->getTextureFrameWidth() * m_scale},
+      .height{m_animData->getTextureFrameHeight() * m_scale}};
 }
 
 // => getter setters

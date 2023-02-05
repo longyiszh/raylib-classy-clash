@@ -18,6 +18,8 @@ private:
   float m_speed;
   float m_scale{4.0f};
   AnimationData *m_animData{};
+  // of type Rectangle[]
+  Rectangle *m_currentRenderPositions{};
 
 public:
   explicit Character(
@@ -31,8 +33,11 @@ public:
   void updateScreenPosition(int windowWidth, int windowHeight);
 
   void tick(float currentDeltaTime);
+  void render();
 
   void undoMovement();
+
+  Rectangle getCollisionBox();
 
   // => getter setters
   // currentTexture

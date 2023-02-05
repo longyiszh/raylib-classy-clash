@@ -1,8 +1,9 @@
-#include "raylib.h"
-#include "raymath.h"
+#include <raylib.h>
+#include <raymath.h>
 
 #include "AnimationData.h"
 #include "Character.h"
+#include "Prop.h"
 
 int main()
 {
@@ -37,6 +38,13 @@ int main()
 
     knight.updateScreenPosition(windowDimensions[0], windowDimensions[1]);
 
+    Prop decos[]{
+        Prop(Vector2{.x = 515.0f, .y = 517.0f}, LoadTexture("assets/nature_tileset/Rock.png")),
+        Prop(Vector2{.x = 615.0f, .y = 717.0f}, LoadTexture("assets/nature_tileset/Log.png")),
+        Prop(Vector2{.x = 815.0f, .y = 1017.0f}, LoadTexture("assets/nature_tileset/Rock.png")),
+        Prop(Vector2{.x = 1015.0f, .y = 917.0f}, LoadTexture("assets/nature_tileset/Log.png")),
+        Prop(Vector2{.x = 737.0f, .y = 934.0f}, LoadTexture("assets/nature_tileset/Rock.png"))};
+
     SetTargetFPS(60);
 
     while (!WindowShouldClose())
@@ -47,12 +55,17 @@ int main()
         BeginDrawing();
         ClearBackground(WHITE);
 
+        // update knight postion
+        knight.tick(deltaTime);
+
+        const Vector2 &currentKnightWorldPosition = knight.getWorldPosition();
+
         /**
          * Instead of moving character on the map,
          * We fix charcter in the middle of the window
          * And move map
          */
-        mapPosition = Vector2Negate(knight.getWorldPosition());
+        mapPosition = Vector2Negate(currentKnightWorldPosition);
 
         // draw map
         DrawTextureEx(
@@ -62,17 +75,36 @@ int main()
             4.0f,
             WHITE);
 
-        // update knight postion, anims and draw it
-        knight.tick(deltaTime);
+        // draw knight
+        knight.render();
+
+        // draw decos
+        for (auto &deco : decos)
+        {
+            deco.Render(currentKnightWorldPosition);
+        }
 
         // undo the knight movement when out of bound
-        const Vector2 currentKnightWorldPosition = knight.getWorldPosition();
         if (currentKnightWorldPosition.x < 0.0f ||
             currentKnightWorldPosition.x > mapTexture.width * mapScale - windowDimensions[0] ||
             currentKnightWorldPosition.y < 0.0f ||
             currentKnightWorldPosition.y > mapTexture.height * mapScale - windowDimensions[1])
         {
             knight.undoMovement();
+        }
+
+        // undo the knight movement when touching decos collision
+        const Rectangle &knightCollisionBox = knight.getCollisionBox();
+
+        for (auto &deco : decos)
+        {
+            const Rectangle &decoCollisionBox = deco.getCollisionBox(currentKnightWorldPosition);
+
+            if (CheckCollisionRecs(knightCollisionBox, decoCollisionBox))
+            {
+                knight.undoMovement();
+                break;
+            }
         }
 
         EndDrawing();
