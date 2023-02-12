@@ -2,10 +2,10 @@
 
 #include "AnimationData.h"
 
-#ifndef Character_H
-#define Character_H
+#ifndef Enemy_H
+#define Enemy_H
 
-class Character
+class Enemy
 {
 private:
   Texture2D *m_currentTexture{};
@@ -22,12 +22,13 @@ private:
   Rectangle *m_currentRenderPositions{};
 
 public:
-  explicit Character(
+  explicit Enemy(
+      // Textures here must have same width and height
       Texture2D idleTexture,
       Texture2D runningTexture,
       float speed);
 
-  ~Character();
+  ~Enemy();
 
   // => methods
   void updateScreenPosition(int windowWidth, int windowHeight);

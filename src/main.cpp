@@ -3,6 +3,7 @@
 
 #include "AnimationData.h"
 #include "Character.h"
+#include "Enemy.h"
 #include "Prop.h"
 
 int main()
@@ -16,6 +17,7 @@ int main()
     Vector2 mapPosition{}; // Will be initialzed to {0.0f, 0.0f}
     const float mapScale{4.0f};
 
+    // knight
     Character knight(
         // Textures here must have same width and height
         LoadTexture("assets/characters/knight_idle_spritesheet.png"),
@@ -38,6 +40,28 @@ int main()
 
     knight.updateScreenPosition(windowDimensions[0], windowDimensions[1]);
 
+    // An Enemy
+    Enemy aGoblin(
+        // Textures here must have same width and height
+        LoadTexture("assets/characters/goblin_idle_spritesheet.png"),
+        LoadTexture("assets/characters/goblin_run_spritesheet.png"),
+        4.0f);
+
+    Texture2D aGoblinCurrentTexture = aGoblin.getCurrentTexture();
+    float aGoblinTextureRangeWidth = aGoblinCurrentTexture.width / 6.0f;
+    float aGoblinTextureRangeHeight = aGoblinCurrentTexture.height;
+
+    AnimationData aGoblinAnimData(
+        6,
+        1,
+        aGoblinTextureRangeWidth,
+        aGoblinTextureRangeHeight,
+        1.0 / 12.0);
+
+    aGoblin.setAnimData(
+        &aGoblinAnimData);
+
+    // Decos
     Prop decos[]{
         Prop(Vector2{.x = 515.0f, .y = 517.0f}, LoadTexture("assets/nature_tileset/Rock.png")),
         Prop(Vector2{.x = 615.0f, .y = 717.0f}, LoadTexture("assets/nature_tileset/Log.png")),
@@ -57,6 +81,7 @@ int main()
 
         // update knight postion
         knight.tick(deltaTime);
+        aGoblin.tick(deltaTime);
 
         const Vector2 &currentKnightWorldPosition = knight.getWorldPosition();
 
@@ -77,6 +102,7 @@ int main()
 
         // draw knight
         knight.render();
+        aGoblin.render();
 
         // draw decos
         for (auto &deco : decos)
@@ -95,6 +121,7 @@ int main()
 
         // undo the knight movement when touching decos collision
         const Rectangle &knightCollisionBox = knight.getCollisionBox();
+        const Rectangle &aGoblinCollisionBox = aGoblin.getCollisionBox();
 
         for (auto &deco : decos)
         {
@@ -103,7 +130,11 @@ int main()
             if (CheckCollisionRecs(knightCollisionBox, decoCollisionBox))
             {
                 knight.undoMovement();
-                break;
+            }
+
+            if (CheckCollisionRecs(aGoblinCollisionBox, decoCollisionBox))
+            {
+                aGoblin.undoMovement();
             }
         }
 
