@@ -1,4 +1,3 @@
-#include "AnimationData.h"
 #include "Enemy.h"
 
 // ctor - dtor
@@ -19,4 +18,15 @@ void Enemy::changeMovingDirection(Vector2 &direction)
 void Enemy::updateScreenPosition(int windowWidth, int windowHeight)
 {
   // TODO: updateScreenPosition
+}
+
+// => getter setters
+Character &Enemy::getTarget(const Character &character) const
+{
+  return *m_target;
+}
+
+void Enemy::setTarget(Character &character)
+{
+  m_target = &character;
 }

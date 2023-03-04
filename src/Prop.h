@@ -1,3 +1,6 @@
+#ifndef Prop_H
+#define Prop_H
+
 #include <raylib.h>
 
 class Prop
@@ -15,3 +18,5 @@ public:
   void Render(const Vector2 &knightPosition);
   Rectangle getCollisionBox(const Vector2 &knightPosition);
 };
+
+#endif

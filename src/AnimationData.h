@@ -1,7 +1,7 @@
-#include "raylib.h"
-
 #ifndef AnimationData_H
 #define AnimationData_H
+
+#include "raylib.h"
 
 class AnimationData
 {

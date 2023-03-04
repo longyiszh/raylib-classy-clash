@@ -1,9 +1,9 @@
+#ifndef BaseCharacter_H
+#define BaseCharacter_H
+
 #include <raylib.h>
 #include <raymath.h>
 #include "AnimationData.h"
-
-#ifndef BaseCharacter_H
-#define BaseCharacter_H
 
 class BaseCharacter
 {

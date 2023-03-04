@@ -1,8 +1,8 @@
-#include "AnimationData.h"
-#include "BaseCharacter.h"
-
 #ifndef Character_H
 #define Character_H
+
+#include "AnimationData.h"
+#include "BaseCharacter.h"
 
 class Character : public BaseCharacter
 {

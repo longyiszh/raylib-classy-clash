@@ -61,6 +61,8 @@ int main()
     aGoblin.setAnimData(
         &aGoblinAnimData);
 
+    aGoblin.setTarget(knight);
+
     // Decos
     Prop decos[]{
         Prop(Vector2{.x = 515.0f, .y = 517.0f}, LoadTexture("assets/nature_tileset/Rock.png")),
