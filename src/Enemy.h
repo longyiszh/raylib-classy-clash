@@ -20,7 +20,7 @@ public:
   // => methods
   void changeMovingDirection(Vector2 &direction) override;
 
-  void updateScreenPosition(int windowWidth, int windowHeight) override;
+  void updateScreenPosition();
 
   // => getter setters
   Character &getTarget(const Character &character) const;

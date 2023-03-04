@@ -14,8 +14,10 @@ private:
 public:
   Prop(Vector2 worldPosition, Texture2D texture);
   ~Prop();
-  // methods
-  void Render(const Vector2 &knightPosition);
+
+  // => methods
+  void updateScreenPosition(const Vector2 &knightPosition);
+  void Render();
   Rectangle getCollisionBox(const Vector2 &knightPosition);
 };
 

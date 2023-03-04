@@ -13,14 +13,6 @@ BaseCharacter::~BaseCharacter()
 }
 
 // => methods
-void BaseCharacter::updateScreenPosition(int windowWidth, int windowHeight)
-{
-  m_screenPosition = {
-      // *4: texture is too tiny, so scaling it up
-      .x{windowWidth / 2.0f - m_scale * (0.5f * (m_animData->getTextureFrameWidth()))},
-      .y{windowHeight / 2.0f - m_scale * (0.5f * (m_animData->getTextureFrameHeight()))}};
-}
-
 void BaseCharacter::tick(float currentDeltaTime)
 {
   // snapshot current world position

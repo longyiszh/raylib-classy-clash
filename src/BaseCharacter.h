@@ -37,7 +37,6 @@ public:
 
   // => methods
   virtual void changeMovingDirection(Vector2 &direction) = 0;
-  virtual void updateScreenPosition(int windowWidth, int windowHeight);
   void tick(float currentDeltaTime);
   void render();
   void undoMovement();

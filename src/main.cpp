@@ -83,7 +83,10 @@ int main()
 
         // update knight postion
         knight.tick(deltaTime);
+
+        // update goblin screen pos
         aGoblin.tick(deltaTime);
+        aGoblin.updateScreenPosition();
 
         const Vector2 &currentKnightWorldPosition = knight.getWorldPosition();
 
@@ -104,12 +107,15 @@ int main()
 
         // draw knight
         knight.render();
+
+        // draw aGoblin
         aGoblin.render();
 
         // draw decos
         for (auto &deco : decos)
         {
-            deco.Render(currentKnightWorldPosition);
+            deco.updateScreenPosition(currentKnightWorldPosition);
+            deco.Render();
         }
 
         // undo the knight movement when out of bound

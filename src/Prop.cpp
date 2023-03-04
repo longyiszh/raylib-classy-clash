@@ -13,12 +13,15 @@ Prop::~Prop()
   UnloadTexture(m_texture);
 }
 
-void Prop::Render(const Vector2 &knightPosition)
+void Prop::updateScreenPosition(const Vector2 &knightPosition)
 {
   m_screenPosition = Vector2Subtract(
       m_worldPosition,
       knightPosition);
+}
 
+void Prop::Render()
+{
   DrawTextureEx(
       m_texture,
       m_screenPosition,

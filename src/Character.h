@@ -17,7 +17,7 @@ public:
 
   void changeMovingDirection(Vector2 &direction) override;
 
-  void updateScreenPosition(int windowWidth, int windowHeight) override;
+  void updateScreenPosition(int windowWidth, int windowHeight);
 };
 
 #endif

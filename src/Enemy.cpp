@@ -15,9 +15,11 @@ void Enemy::changeMovingDirection(Vector2 &direction)
   // TODO
 }
 
-void Enemy::updateScreenPosition(int windowWidth, int windowHeight)
+void Enemy::updateScreenPosition()
 {
-  // TODO: updateScreenPosition
+  m_screenPosition = Vector2Subtract(
+      m_worldPosition,
+      m_target->getWorldPosition());
 }
 
 // => getter setters
