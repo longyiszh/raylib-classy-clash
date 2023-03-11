@@ -12,14 +12,18 @@ Enemy::Enemy(
 // => methods
 void Enemy::changeMovingDirection(Vector2 &direction)
 {
-  // TODO
+  direction = Vector2Subtract(
+      m_target->getWorldPosition(),
+      m_worldPosition);
 }
 
 void Enemy::updateScreenPosition()
 {
-  m_screenPosition = Vector2Subtract(
-      m_worldPosition,
-      m_target->getWorldPosition());
+  m_screenPosition = Vector2Add(
+      Vector2Subtract(
+          m_worldPosition,
+          m_target->getWorldPosition()),
+      m_target->getScreenPosition());
 }
 
 // => getter setters

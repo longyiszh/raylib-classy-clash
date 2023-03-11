@@ -45,7 +45,7 @@ int main()
         // Textures here must have same width and height
         LoadTexture("assets/characters/goblin_idle_spritesheet.png"),
         LoadTexture("assets/characters/goblin_run_spritesheet.png"),
-        4.0f);
+        3.0f);
 
     Texture2D aGoblinCurrentTexture = aGoblin.getCurrentTexture();
     float aGoblinTextureRangeWidth = aGoblinCurrentTexture.width / 6.0f;
