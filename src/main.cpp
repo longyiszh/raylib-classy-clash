@@ -86,7 +86,6 @@ int main()
 
         // update goblin screen pos
         aGoblin.tick(deltaTime);
-        aGoblin.updateScreenPosition();
 
         const Vector2 &currentKnightWorldPosition = knight.getWorldPosition();
 

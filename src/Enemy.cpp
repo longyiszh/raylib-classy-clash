@@ -17,16 +17,16 @@ void Enemy::changeMovingDirection(Vector2 &direction)
       m_worldPosition);
 }
 
-void Enemy::updateScreenPosition()
+// => getter setters
+const Vector2 Enemy::getScreenPosition() const
 {
-  m_screenPosition = Vector2Add(
+  return Vector2Add(
       Vector2Subtract(
           m_worldPosition,
           m_target->getWorldPosition()),
       m_target->getScreenPosition());
 }
 
-// => getter setters
 Character &Enemy::getTarget(const Character &character) const
 {
   return *m_target;

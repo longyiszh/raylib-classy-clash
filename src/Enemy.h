@@ -20,9 +20,8 @@ public:
   // => methods
   void changeMovingDirection(Vector2 &direction) override;
 
-  void updateScreenPosition();
-
   // => getter setters
+  const Vector2 getScreenPosition() const override;
   Character &getTarget(const Character &character) const;
   void setTarget(Character &character);
 };

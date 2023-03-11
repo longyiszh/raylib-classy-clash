@@ -61,8 +61,8 @@ void BaseCharacter::tick(float currentDeltaTime)
           .height{m_animData->getTextureFrameHeight()}},
       // destination
       {
-          .x{m_screenPosition.x},
-          .y{m_screenPosition.y},
+          .x{getScreenPosition().x},
+          .y{getScreenPosition().y},
           .width{m_animData->getTextureFrameWidth() * m_scale},
           .height{m_animData->getTextureFrameHeight() * m_scale}}};
 }
@@ -86,8 +86,8 @@ void BaseCharacter::undoMovement()
 Rectangle BaseCharacter::getCollisionBox()
 {
   return Rectangle{
-      .x{m_screenPosition.x},
-      .y{m_screenPosition.y},
+      .x{getScreenPosition().x},
+      .y{getScreenPosition().y},
       .width{m_animData->getTextureFrameWidth() * m_scale},
       .height{m_animData->getTextureFrameHeight() * m_scale}};
 }
@@ -98,17 +98,6 @@ Rectangle BaseCharacter::getCollisionBox()
 const Texture2D &BaseCharacter::getCurrentTexture() const
 {
   return *m_currentTexture;
-}
-
-// screenPosition
-const Vector2 &BaseCharacter::getScreenPosition() const
-{
-  return m_screenPosition;
-}
-
-void BaseCharacter::setScreenPosition(Vector2 &screenPosition)
-{
-  m_screenPosition = screenPosition;
 }
 
 // worldPosition

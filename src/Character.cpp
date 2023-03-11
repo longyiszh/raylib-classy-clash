@@ -29,3 +29,14 @@ void Character::changeMovingDirection(Vector2 &direction)
   if (IsKeyDown(KEY_S))
     direction.y += 1.0f;
 }
+
+// getter setters
+const Vector2 Character::getScreenPosition() const
+{
+  return m_screenPosition;
+}
+
+void Character::setScreenPosition(Vector2 &screenPosition)
+{
+  m_screenPosition = screenPosition;
+}

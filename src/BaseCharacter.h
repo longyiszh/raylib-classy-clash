@@ -12,7 +12,6 @@ protected:
   Texture2D *m_currentTexture{};
   Texture2D m_idleTexture;
   Texture2D m_runningTexture;
-  Vector2 m_screenPosition{};
   Vector2 m_worldPosition{};
   Vector2 m_lastWorldPosition{};
   float m_xDirection{1.0f};
@@ -47,9 +46,8 @@ public:
   const Texture2D &getCurrentTexture() const;
 
   // screenPosition
-  const Vector2 &getScreenPosition() const;
+  virtual const Vector2 getScreenPosition() const = 0;
 
-  void setScreenPosition(Vector2 &screenPosition);
   // worldPosition
   const Vector2 &getWorldPosition() const;
 
